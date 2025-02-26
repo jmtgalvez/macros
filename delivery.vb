@@ -5,6 +5,7 @@ Private Sub ClearBtn_Click()
     ClearBtn.Font.Size = 12
 End Sub
 Private Sub Populate()
+    'TODO
     'Ask for file
     'Get all on hand
     'Separate by customer
@@ -35,6 +36,7 @@ Private Sub Populate()
     ActiveWindow.View = xlNormalView
     Application.Calculation = xlCalculationManual
     
+    'Ask for file
     Dim OpenBook As Workbook: Set OpenBook = Application.Workbooks.Open(OpenFile)
     Dim OpenSheet As Worksheet
     
@@ -66,14 +68,16 @@ Private Sub Populate()
     Call DeleteSheets
     
     Dim CountsDict As New Scripting.Dictionary
-    For i = 3 To 65536
-        Customer = OpenSheet.Cells(i, 4).Value
+    For I = 3 To 65536
+        Customer = OpenSheet.Cells(I, 4).Value
         
         If Customer = "" Then
             Exit For
         End If
         
-        If OpenSheet.Range("AV" & i).Value = "ON HAND" Then
+        'Get all on hand
+        If OpenSheet.Range("AV" & I).Value = "ON HAND" Then
+            'Separate by customer
             If Not CountsDict.Exists(Customer) Then
                 CountsDict.Add Customer, 0
                 Call CreateNewSheet(CStr(Customer))
@@ -85,17 +89,18 @@ Private Sub Populate()
             Dim ThisSheet As Worksheet: Set ThisSheet = ThisWorkbook.Sheets(Customer)
             Row = Count + 5
             ThisSheet.Range("B" & Row).Value = Count
-            If OpenSheet.Range("BC" & i).Value = "N1" Then
+            If OpenSheet.Range("BC" & I).Value = "N1" Then
                 ThisSheet.Range("D" & Row).Value = 1
-            ElseIf OpenSheet.Range("BC" & i).Value = "M1" Then
+            ElseIf OpenSheet.Range("BC" & I).Value = "M1" Then
                 ThisSheet.Range("D" & Row).Value = 7
             End If
             For Each col In CopyDict("Columns").Keys
-                ThisSheet.Range(CopyDict("Columns")(col) & Row).Value = OpenSheet.Range(col & i).Value
+                ThisSheet.Range(CopyDict("Columns")(col) & Row).Value = OpenSheet.Range(col & I).Value
             Next col
         End If
-    Next i
+    Next I
     
+    'Generate Delivery Lists
     For Each Key In CountsDict.Keys
         GenerateFile (CStr(Key))
     Next Key
@@ -105,7 +110,6 @@ Private Sub Populate()
     Application.Calculation = xlCalculationAutomatic
     Application.ScreenUpdating = True
     
-    'Reset font size
     MsgBox "Finished"
 End Sub
 
@@ -136,7 +140,7 @@ Private Sub GenerateFile(sheetName As String)
     Dim NewBook As Workbook: Set NewBook = Workbooks.Add
     Dim FromSheet As Worksheet: Set FromSheet = ThisWorkbook.Worksheets(sheetName)
     FromSheet.Range("B2").Value = "Customer Name: " & sheetName
-    FromSheet.Range("B3").Value = "Deliery Date: " & Format(Date, "mmmm d, yyyy")
+    FromSheet.Range("B3").Value = "Delivery Date: " & Format(Date, "mmmm d, yyyy")
     FromSheet.Copy Before:=NewBook.Sheets(1)
     FromSheet.Delete
     FilePath = ThisWorkbook.Path & "\Output\" & sheetName & ".xlsx"
@@ -151,3 +155,4 @@ End Sub
 Private Sub PopulateBtn_Click()
     Call Populate
 End Sub
+
