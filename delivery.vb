@@ -110,6 +110,8 @@ Private Sub Populate()
     Application.Calculation = xlCalculationAutomatic
     Application.ScreenUpdating = True
     
+    OpenBook.Close(True)
+    ThisWorkbook.Save
     MsgBox "Finished"
 End Sub
 
